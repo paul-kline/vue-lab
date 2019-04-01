@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Vue Lab</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <style>
+    p {
+        text-indent: 2em;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-3">
+      <h1>Lab 6: Vue</h1>
+      <h3>Background</h3>
+      <p>You now have some experience server side (PHP) and client side (html/javascript) programming. To review, PHP is a server side scripting language which executes as quickly as it can when someone requests that web resource. All your echo or print statements are written to a temporary file to be returned to the requester. 
+            
+        <p>You may have thought this pattern a bit odd: using one language server side to generate 2 client side languages. Indeed it is odd, but nevertheless, PHP is one of the most common server side languages. 
+            There are 2 modern day remedies that I wouldn’t exactly call cures, but do help the situation.</p>
+        <ol>
+            <li>
+                <p>
+                    <i>At least</i> make the server side and client side languages the same so the connection between them isn’t so clunky and programmers can reuse their knowledge of JavaScript. Enter nodejs. 
+                </p>
+                    <p>
+                        Nodejs is simply the the part of chrome that can execute javascript (<a href="https://v8.dev/">V8</a>) along with some additional useful libraries.  These libraries include things like web servers, file writing, mysql, etc. that are not part of traditional client-based javascript. With these additions, you could now have all your client side and server side code written in JavaScript--one language to rule them all. As much as I dislike JavaScript, it is a whole heck of a lot easier to use than PHP. 
+                    </p>
+                    Nodejs’s main purpose is to be a web server--to replace the need for PHP. In fact when you visit the about page for nodejs.org, the demo program shows how to write a basic web server program. It’s still a general purpose language, and nothing stops you from using it to run arbitrary JavaScript files that aren’t webservers. Just know that some things will be missing like the DOM.
+                    <p>
+                    nodejs faced a difficult issue. Recall that JavaScript’s initial purpose was to be an itsy bitsy bit of code included along with some HTML for enhanced interactivity. Having such humble beginnings, JavaScript lacked some basics--perhaps most importantly, a module system (see <a href="https://eloquentjavascript.net/10_modules.html"> chapter 10 of Eloquent Javascript</a> for more details). So the community invented one out of existing JavaScript constructs and called this method CommonJS. Since then, ECMA/JavaScript has evolved and since ES6 has its own built in module system people refer to as ES6 modules. So right now there are TWO ways to create and use modules. What a confusing mess. Though since CommonJS is simply vanilla JavaScript, you can use both methods within the same file if you need to. 
+                    </p>
+
+                <p>
+                    npm is the main package manager for JavaScript libraries. It is a central location to where people publish their libraries and also a program called “npm” which is included when you download node that helps you download and manage libraries for your your project.
+                </p> 
+                <p>
+                    Naturally, web developers wanted to be able to use some of the vast functionality of javascript libraries in npm in their web pages. To help make this jump from an npm/node program into what we call a web application, a number of programs appeared. Most of these are written in JavaScript and executed via nodejs in the development cycle:</p>
+                    <ul>
+                        <li><strong><a href="http://browserify.org/">Browserify</a></strong>-- allows you to use the nodeJS module system syntax (CommonJS) to “compile” for use in a browser.</li>
+                        <li><strong><a href="https://webpack.js.org/">Webpack</a></strong>-- does the same thing as Browserify, but has some additional functionality and is quite a bit more popular than browserify.</li>
+                        <li><strong><a href="https://babeljs.io/">Babel</a></strong>-- a transpiler which allows programmers to write javascript using the newest additions without worrying that a particular browser doesn’t support the new javascript yet. Babel transpiles to an older version of JS. Frankly, I don’t really care about supporting older browsers. People using IE11 aren’t the kind of users I want anyway. Nevertheless, I use babel on almost every web project so I can write in TypeScript (a superset of JS that allows me to use types when writing JS) and transpile down to JavaScript. It is interesting how JavaScript was meant as a programming language, yet fewer and fewer people write JS directly and instead opt to write code that transpiles to it.</li>
+                    </ul>
+                       <p> This leads us to the second “treatment”</p>
+                    
+                    </li>
+            <li>Shift most if not all of the work to the client. Instead of generating a custom experience for each visitor like a php or nodejs script, serve everyone a static webpage which includes js code for the client to run to create their own customized experience. This will inevitably end up with some requests to a server, but you either create those separately or use an existing service like firebase. For example, using Firebase Authentication and Firebase Firestore, you can write an application that authenticates AND fetches the user’s personal information 100% client side--No server side code writing at all. Cool! This has the added benefit that you don’t need PHP or mysql or nodejs installed and running taking up resources on your server. Your server is simply serving static webpages with a bunch of JavaScript in them. This makes caching and serving many clients quickly very easy.</li>
+        </ol>
+            2. 
+            However, now we have a new problem which is the focus of this lab. The problem is simply this: writing a large web application naturally consists of frequently displaying information to the user and getting information from the user. In other words, you have a some data in JavaScript that you wish to turn into HTML elements, and you have HTML elements that get data from the user you need to turn into JavaScript. This back and forth binding is perfectly possible in vanilla javascript but:
+        Has significant boilerplate
+        Does not scale well--like at all.
+      </p>
+     
+      
+  Consider the following example:
+  <div>Please enter the cost of the item:</div>
+     $<input oninput="recalculate()" type="number" name="" id="txt" />
+     <div id="output"></div>
+     <script>
+       const TAX = 0.065;
+       function recalculate() {
+         const cost = parseFloat(document.getElementById("txt").value);
+         console.log(cost);
+         const total = cost + cost * TAX;
+         document.getElementById("output").innerText = "$" + total;
+       }
+     </script>
+  
+  You can interact with this example here. 
+  What if I wanted to color the background according to the total cost? What if I had many outputs based on many inputs? What if I also had outputs that depended on several inputs? What if I needed to display a list dynamically? You might be able to see how this can get pretty complicated and messy pretty quickly. This is where JavaScript Frameworks come into play. There are three popular JavaScript Frameworks:
+  Angular
+  React
+  Vue
+      
+      Of these 3, Vue is my favorite because it is about 1 order of magnitude easier to set up and  get started using than Angular or even React. It is heavily influenced by Angular but is much easier to use. In the words of Vue’s creator, “I figured, what if I could just extract the part that I really liked about Angular and build something really lightweight.” Watch the video on this page by clicking the Why vue.js? Button for a small introduction to Vue.
+  
+  
+  
+  In this lab, we will be using Vue.js to create a small web application. Additionally, we want it to be pretty, so in addition to the JavaScript framework Vue.js, we will be using the most popular front-end framework known as Bootstrap.
+  Bootstrap is nothing more than a collection of CSS classes along with some JavaScript files to enhance the css classes. For example, bootstrap includes classes for accordions and tooltips, but they won’t work properly without the javascript which finds elements of the specified classes and adds the associated functionality. As CSS becomes increasingly sophisticated, I wouldn’t be surprised if a future version of Bootstrap doesn’t require any JS and you need only include a bootstrap CSS stylesheet in your html page.
+  I prefer to use Visual Studio Code with the live server extension installed, but you can use any editor you like.
+  Note that there are TWO ways to use Vue. 
+  Use npm and node to create a project, add vue to it (an npm package), add bootstrap (an npm package), install webpack (an npm package), and eventually build the project into html, css, and js components. 
+  Link to hosted versions of bootstrap and hosted versions of vue in an html page.
+  Each method has its own benefits. A couple reasons to use the second method are
+  It’s much easier
+  If your user has visited any other page on the internet that also linked to these publicly hosted resources, the browser already has these files in its cache and the load will be very fast.
+     In this lab, you will be creating a web app which queries the user’s location and dynamically shows you the closest X number of bus stops in Lawrence. Cool!
+  
+  
+  
+  Step 1: Setup. Here is some boilerplate HTML for a blank page. The ‘meta’ tags ensure that the webpage will display nicely on a mobile device. 
+  <!DOCTYPE html>
+  <html lang="en">
+   <head>
+     <meta charset="UTF-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+     <title>Vue Lab</title>
+   </head>
+   <body></body>
+  </html>
+  
+  The next step is to add bootstrap to your page. According to the bootstrap website, I just need to add links to the stylesheet and javascript like so:
+  <!DOCTYPE html>
+  <html lang="en">
+   <head>
+     <meta charset="UTF-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+     <title>Vue Lab</title>
+     <link
+       rel="stylesheet"    href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+       crossorigin="anonymous"
+     />
+   </head>
+   <body>
+  
+  
+    
+     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+     <script
+       src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+       integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+       crossorigin="anonymous"
+     ></script>
+     <script
+       src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+       integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+       crossorigin="anonymous"
+     ></script>
+   </body>
+  </html>
+  
+  
+  Now ensure bootstrap is working properly. Copy and paste in the example jumbotron element above the script tags within the body tag. While you’re there, feel free to explore the other components, layouts, and utilities accessible through adding classes to your html elements. Try a couple you find interesting on some test elements in your page.
+   
+  
+  Now add Vue to your webpage.
+  Follow these directions to add the Vue script tag just before your </body> tag. 
+  Place the following in your body element before all your script tags:
+  <div class="container">
+       <div id="app">
+         Message: {{ message }}
+       </div>
+     </div>
+  And create a new script tag just before </body> which includes:
+  const app = new Vue({
+    el: '#app',
+    data: {
+      message: 'Hello Vue!'
+    }
+  })
+  Now view your webpage in a browser, open up the console and type: app.message = “whatever”
+      To see that Vue reacts to the change automagically.
+  Read through the rest of the page down to Vue Components, which is outside the scope of this lab. 
+  Add a data property called ‘todos’ and initialize it with a few todo items as strings. 
+  Use the v-for directive to display each item in the todo list. Note that this has to be used within the div with the id of “app”. 
+  Once again, open the web page in a browser and open up the console to manipulate app.todos in various ways: push, pop, sort, etc. 
+  Take a screenshot of your the page and your console interactions to turn in for this lab. 
+  
+  
+  Part 2a:
+  Make a data property called stops and initialize it to an empty list
+  Using the fetch web api, store the stops by visiting the page at: https://utils.pauliankline.com/stops.json 
+  You may want to do this in the ‘mounted’ life cycle hook of your vue app object.
+  Add a data property called numStops  and bind it to an input element at the top of your page. This will control how many stops are displayed to the user. Initialize numstops to 10.
+  Create a computed property called filteredStops which returns the first numStops number of stops
+  Display the first filteredStops to the user as bootstrap cards using the v-for directive. 
+  Use each stop’s name as the card title and the stop’s description property as the card’s text. 
+  Part 2b:
+  Create a new data property(/ies) to store the user’s location.
+  You will need to obtain the user’s location using the geolocation api. Note this has nothing to do with vue. Note 2: geolocation only works from localhost or over https connections for privacy.
+  You will also need to ‘watch’ location using the geolocation api.
+  Every time the location is obtained/changed, recalculate the distance property of each stop. The distance property is initialized to 999,999 which is an impossible earthly distance in km or miles since it is >half the circumference of the earth.
+  Note: be careful of the order here. Fetch is asynchronous. Make sure the distances are calculated properly even if the position of the user is obtained before you receive the stops.
+  You will need to create a distance function which returns the distance between two sets of geographic coordinates. If you struggle with this, cite your sources.  You can use whatever units you prefer (km,mi, etc) so long as you indicate the unit to the user in the next steps.
+  Note: If you think the distances all seem a bit off and you are confident your distance function is correct, know that the geolocation api uses whatever location information is available. For the lab computers, which do not have gps’s, a best guess location is used based on IP address. So the coordinates returned by the geolocation api may be based on your router, building connection, KU’s connection, Kansas, etc. As more detailed location information becomes available, the watchPosition callback will be called. 
+  Modify the HTML within your v-for directive to also display the user’s distance to each stop.
+  Modify the code in your filteredStops computed property to return the closest numStops stops.
+  Congratz! If you’ve written everything correctly, you can make this an html page in your people.eecs.ku.edu public_html directory. Open it on your mobile phone and see the distances change as you walk around.
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+      <div id="app"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script></script>
+  </body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Vue Lab</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="container mt-3">
+      <div id="app">
+        Number of stops to show: <input v-model.number="numstops" type="number" min="0" step="1" />
+        <div class="card shadow p-3 mb-2 bg-white rounded" v-for="item in filteredStops" :key="item.id">
+          <div class="card-body">
+            <h5 class="card-title">{{ item.name }}</h5>
+            <div class="card-text">
+              <div>{{ item.description }}</div>
+              <div>Distance: {{ round(item.distance) }} km</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script>
+      const app = new Vue({
+        el: "#app",
+        data: {
+          stops: [],
+          numstops: 10,
+          coords: { lat: null, lng: null }
+        },
+        computed: {
+          filteredStops() {
+            return this.stops.sort((a, b) => a.distance - b.distance).slice(0, this.numstops);
+          }
+        },
+        methods: {
+          round(n, c = 3) {
+            c = 10 ** c;
+            return Math.round(n * c) / c;
+          },
+          updateCoords(coords) {
+            this.coords.lat = coords.latitude;
+            this.coords.lng = coords.longitude;
+            console.log("coords:", coords);
+            this.updateDistances();
+          },
+          updateDistances() {
+            const coords = this.coords;
+            this.stops.forEach(stop => {
+              stop.distance = calcCrow(stop.lat, stop.lon, coords.lat, coords.lng);
+            });
+          }
+        },
+        mounted() {
+          const me = this;
+          fetch("https://utils.pauliankline.com/stops.json")
+            .then(function(response) {
+              return response.json();
+            })
+            .then(function(myJson) {
+              //   app.stops.push(...myJson);
+              //   app.stops = myJson;
+              me.stops = myJson;
+              if (me.coords.lat) {
+                me.updateDistances();
+              }
+              console.log(JSON.stringify(myJson));
+            });
+          if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+              me.updateCoords(position.coords);
+            });
+            navigator.geolocation.watchPosition(function(position) {
+              me.updateCoords(position.coords);
+            });
+            /* geolocation is available */
+          }
+        }
+      });
+
+      //https://stackoverflow.com/questions/18883601/function-to-calculate-distance-between-two-coordinates
+      //This function takes in latitude and longitude of two location and returns the distance between them as the crow flies (in km)
+      function calcCrow(lat1, lon1, lat2, lon2) {
+        var R = 6371; // km
+        var dLat = toRad(lat2 - lat1);
+        var dLon = toRad(lon2 - lon1);
+        var lat1 = toRad(lat1);
+        var lat2 = toRad(lat2);
+
+        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var d = R * c;
+        return d;
+      }
+
+      // Converts numeric degrees to radians
+      function toRad(Value) {
+        return (Value * Math.PI) / 180;
+      }
+    </script>
+  </body>
+</html>
